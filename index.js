@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require("dotenv").config()
 const app = express();
 const port = process.env.PORT || 5000;
@@ -16,6 +16,7 @@ const corsOptions ={
   app.use(cors(corsOptions))
   app.use(express.json());
 
+  
 
 
 
@@ -34,8 +35,43 @@ async function run() {
     try {
       
         const contactCollection = client.db("redDropDb").collection("contact");
+      const blogCollection = client.db("redDropDb").collection("blog");
+      const userCollection = client.db("redDropDb").collection("users");
 
+//users related API
+   
+      app.get('/allUsers', async (req, res) => {
+        const result = await userCollection.find().toArray();
+  res.send(result);
+});   
+      
+      
+app.post("/users", async (req, res) => {
+  const user = req.body;
 
+  //insert email if user not exist
+  const query = { email: user.email }
+  const existingUser = await userCollection.findOne(query)
+  if (existingUser) {
+    return res.send({message: 'user already existingUser', insertedId: null})
+  }
+  const result = await userCollection.insertOne(user);
+  res.send(result);
+});
+      
+      
+      
+      
+      //Delete user from dashboard
+app.delete('/allUsers/:Id', async (req, res) => {
+  const Id = req.params.Id;
+   const idObject = new ObjectId(Id)
+  console.log(Id);
+  const result = await userCollection.deleteOne({ _id: idObject });
+  console.log(result);
+  res.send(result);
+  
+});
 
 //for contact form
 app.post("/contact", async (req, res) => {
@@ -44,7 +80,16 @@ app.post("/contact", async (req, res) => {
     res.send(result);
   });
 
+      
 
+        
+        //blog field
+
+        app.get("/blog", async (req, res) => {
+            const cursor = blogCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+          });
 
 
 
