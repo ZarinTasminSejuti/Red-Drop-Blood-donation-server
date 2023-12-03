@@ -37,7 +37,20 @@ async function run() {
         const contactCollection = client.db("redDropDb").collection("contact");
       const blogCollection = client.db("redDropDb").collection("blog");
       const userCollection = client.db("redDropDb").collection("users");
+      const districtCollection = client.db("redDropDb").collection("district");
+      const upazilaCollection = client.db("redDropDb").collection("upazila");
 
+      app.get("/district", async (req, res) => {
+        const cursor = districtCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      });
+
+      app.get("/upazila", async (req, res) => {
+        const cursor = upazilaCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      }); 
 //users related API
    
       app.get('/allUsers', async (req, res) => {
@@ -59,8 +72,13 @@ app.post("/users", async (req, res) => {
   res.send(result);
 });
       
-      
-      
+      //add blog in dashboard content management
+app.post("/addBlog", async (req, res) => {
+  const newBlog = req.body;
+  const result = await blogCollection.insertOne(newBlog);
+  res.send(result);
+});
+
       
       //Delete user from dashboard
 app.delete('/allUsers/:Id', async (req, res) => {
@@ -91,6 +109,34 @@ app.post("/contact", async (req, res) => {
             res.send(result);
           });
 
+      
+      //update operation
+// app.get('/updateUserInfo/:_id', async (req, res) => {  
+//   const updateProductId = req.params._id;
+//   const idObject = new ObjectId(updateProductId)
+//   const result = await productCollection.findOne( idObject );
+//   res.send(result); 
+//   console.log(idObject);
+// })
+    
+
+app.put('/updateUserInfo/:_id', async (req, res) => {
+  const updateId = req.params._id;
+  const updateInfo = req.body;
+  const filter = {_id: new ObjectId(updateId)}
+  const options = { upsert: true };
+  const updateUserElement = {
+    $set: {
+      status: updateInfo.status,
+      role: updateInfo.role,
+    }
+  }
+    console.log(updateInfo); 
+
+const result = await userCollection.updateOne(filter, updateUserElement, options)
+  res.send(result); 
+  console.log(result);
+})
 
 
 
