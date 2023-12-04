@@ -39,6 +39,7 @@ async function run() {
       const userCollection = client.db("redDropDb").collection("users");
       const districtCollection = client.db("redDropDb").collection("district");
       const upazilaCollection = client.db("redDropDb").collection("upazila");
+      const newDonationRequestCollection = client.db("redDropDb").collection("newDonationRequest");
 
       app.get("/district", async (req, res) => {
         const cursor = districtCollection.find();
@@ -90,6 +91,22 @@ app.delete('/allUsers/:Id', async (req, res) => {
   res.send(result);
   
 });
+      
+      
+      
+      //Delete donation request single data from my donation request page in donor dashboard
+app.delete('/deleteDonationData/:Id', async (req, res) => {
+  const Id = req.params.Id;
+   const idObject = new ObjectId(Id)
+  console.log(Id);
+  const result = await newDonationRequestCollection.deleteOne({ _id: idObject });
+  console.log(result);
+  res.send(result);
+  
+});
+      
+      
+
 
 //for contact form
 app.post("/contact", async (req, res) => {
@@ -99,6 +116,22 @@ app.post("/contact", async (req, res) => {
   });
 
       
+      
+      
+      //api of create new donation request by donor
+
+
+      app.get("/CreateDonation", async (req, res) => {
+        const cursor = newDonationRequestCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      });
+
+      app.post("/CreateDonation", async (req, res) => {
+        const createNewDonationRequest = req.body;
+        const result = await newDonationRequestCollection.insertOne(createNewDonationRequest);
+        res.send(result);
+      });
 
         
         //blog field
